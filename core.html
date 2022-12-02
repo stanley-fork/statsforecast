@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.269">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Methods for Fit, Predict, Forecast (fast), Cross Validation and plotting">
+
+<title>statsforecast - Core Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./favicon_png.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-NXJNCVR18L"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-NXJNCVR18L', { 'anonymize_ip': true});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="statsforecast - Core Methods">
+<meta property="og:description" content="Methods for Fit, Predict, Forecast (fast), Cross Validation and plotting">
+<meta property="og:image" content="https://github.com/Nixtla/styles/blob/2abf51612584169874c90cd7c4d347e3917eaf73/images/Banner%20Github.png">
+<meta property="og:site-name" content="statsforecast">
+<meta name="twitter:title" content="statsforecast - Core Methods">
+<meta name="twitter:description" content="Methods for Fit, Predict, Forecast (fast), Cross Validation and plotting">
+<meta name="twitter:image" content="https://farm6.staticflickr.com/5510/14338202952_93595258ff_z.jpg">
+<meta name="twitter:site" content="@Nixtlainc">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">statsforecast</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="./examples/getting_started_short.html" aria-current="page">
+ <span class="menu-text">Get Started</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-nixtlaverse" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">NixtlaVerse</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-nixtlaverse">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/nixtla/mlforecast">
+ <span class="dropdown-text">MLForecast 🤖</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/nixtla/neuralforecast">
+ <span class="dropdown-text">NeuralForecast 🧠</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/nixtla/hierachicalforecast">
+ <span class="dropdown-text">HierarchicalForecast 👑</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-help" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Help</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-help">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/nixtla/statsforecast/issues/new/choose"><i class="bi bi-bug" role="img">
+</i> 
+ <span class="dropdown-text">Report an Issue</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://join.slack.com/t/nixtlaworkspace/shared_invite/zt-135dssye9-fWTzMpv2WBthq8NK0Yvu6A"><i class="bi bi-chat-right-text" role="img">
+</i> 
+ <span class="dropdown-text">Join our Slack</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/nixtla/statsforecast"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/nixtlainc"><i class="bi bi-twitter" role="img" aria-label="Nixtla Twitter">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Core Methods</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">StatsForecast ⚡️</a>
+  </div>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="false">Getting Started</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/installation.html" class="sidebar-item-text sidebar-link">Install</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/getting_started_short.html" class="sidebar-item-text sidebar-link">Quick Start</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/getting_started_complete.html" class="sidebar-item-text sidebar-link">End to End Walkthrough</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="false">Tutorials</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/getting_started_with_auto_arima_and_ets.html" class="sidebar-item-text sidebar-link">Forecast with ARIMA and ETS</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/anomalydetection.html" class="sidebar-item-text sidebar-link">Anomaly Detection</a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="false">Forecast at scale</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/scale/dask.html" class="sidebar-item-text sidebar-link">Dask</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/scale/ray.html" class="sidebar-item-text sidebar-link">Ray</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/scale/spark.html" class="sidebar-item-text sidebar-link">Spark</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/crossvalidation.html" class="sidebar-item-text sidebar-link">Cross validation</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/multipleseasonalities.html" class="sidebar-item-text sidebar-link">Multiple seasonalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/electricityloadforecasting.html" class="sidebar-item-text sidebar-link">Electricity load forecast</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/electricitypeakforecasting.html" class="sidebar-item-text sidebar-link">Detect Demand Peaks</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/intermittentdata.html" class="sidebar-item-text sidebar-link">Intermitent/Sparse data</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/uncertaintyintervals.html" class="sidebar-item-text sidebar-link">Prediction Intervals</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/exogenous.html" class="sidebar-item-text sidebar-link">Exogenous Regressors</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./adapters.prophet.html" class="sidebar-item-text sidebar-link">Replace FB-Prophet</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/migrating_R.html" class="sidebar-item-text sidebar-link">Migrating from R</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/models_intro.html" class="sidebar-item-text sidebar-link">StatsForecast’s Models</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">API Reference</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core.html" class="sidebar-item-text sidebar-link active">Core Methods</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.html" class="sidebar-item-text sidebar-link">Models</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distributed.fugue.html" class="sidebar-item-text sidebar-link">FugueBackend</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./examples/experiments.html" class="sidebar-item-text sidebar-link">Experiments</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/autoarima_vs_prophet.html" class="sidebar-item-text sidebar-link">AutoARIMA Comparison (Prophet and pmdarima)</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/prophet_spark_m5.html" class="sidebar-item-text sidebar-link">StatsForecast ETS and Facebook Prophet on Spark (M5)</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/ets_ray_m5.html" class="sidebar-item-text sidebar-link">Forecasting at Scale using ETS and ray (M5)</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="false">Community</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  Contributing
+  </li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#statsforecast" id="toc-statsforecast" class="nav-link active" data-scroll-target="#statsforecast">StatsForecast</a></li>
+  <li><a href="#statsforecast.fit" id="toc-statsforecast.fit" class="nav-link" data-scroll-target="#statsforecast.fit">StatsForecast.fit</a></li>
+  <li><a href="#satstforecast.predict" id="toc-satstforecast.predict" class="nav-link" data-scroll-target="#satstforecast.predict">SatstForecast.predict</a></li>
+  <li><a href="#statsforecast.fit_predict" id="toc-statsforecast.fit_predict" class="nav-link" data-scroll-target="#statsforecast.fit_predict">StatsForecast.fit_predict</a></li>
+  <li><a href="#statsforecast.forecast" id="toc-statsforecast.forecast" class="nav-link" data-scroll-target="#statsforecast.forecast">StatsForecast.forecast</a></li>
+  <li><a href="#statsforecast.forecast_fitted_values" id="toc-statsforecast.forecast_fitted_values" class="nav-link" data-scroll-target="#statsforecast.forecast_fitted_values">StatsForecast.forecast_fitted_values</a></li>
+  <li><a href="#statsforecast.cross_validation" id="toc-statsforecast.cross_validation" class="nav-link" data-scroll-target="#statsforecast.cross_validation">StatsForecast.cross_validation</a></li>
+  <li><a href="#statsforecast.cross_validation_fitted_values" id="toc-statsforecast.cross_validation_fitted_values" class="nav-link" data-scroll-target="#statsforecast.cross_validation_fitted_values">StatsForecast.cross_validation_fitted_values</a></li>
+  <li><a href="#statsforecast.plot" id="toc-statsforecast.plot" class="nav-link" data-scroll-target="#statsforecast.plot">StatsForecast.plot</a></li>
+  <li><a href="#misc" id="toc-misc" class="nav-link" data-scroll-target="#misc">Misc</a>
+  <ul class="collapse">
+  <li><a href="#integer-datestamp" id="toc-integer-datestamp" class="nav-link" data-scroll-target="#integer-datestamp">Integer datestamp</a></li>
+  <li><a href="#external-regressors" id="toc-external-regressors" class="nav-link" data-scroll-target="#external-regressors">External regressors</a></li>
+  <li><a href="#confidence-intervals" id="toc-confidence-intervals" class="nav-link" data-scroll-target="#confidence-intervals">Confidence intervals</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Nixtla/statsforecast/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Core Methods</h1>
+</div>
+
+<div>
+  <div class="description">
+    Methods for Fit, Predict, Forecast (fast), Cross Validation and plotting
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>The core methods of <a href="https://Nixtla.github.io/statsforecast/core.html#statsforecast"><code>StatsForecast</code></a> are:</p>
+<ul>
+<li><code>StatsForecast.fit</code></li>
+<li><code>StatsForecast.predict</code></li>
+<li><code>StatsForecast.forecast</code></li>
+<li><code>StatsForecast.cross_validation</code></li>
+<li><code>StatsForecast.plot</code></li>
+</ul>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L1407" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="statsforecast" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast">StatsForecast</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast (models:List[Any], freq:str, n_jobs:int=1,
+                ray_address:Optional[str]=None,
+                df:Optional[pandas.core.frame.DataFrame]=None,
+                sort_df:bool=True, fallback_model:Any=None,
+                verbose:bool=False, backend:Any=None)</code></pre>
+</blockquote>
+<p>core.StatsForecast.</p>
+<p>The <code>core.StatsForecast</code> class allows you to efficiently fit multiple <a href="https://Nixtla.github.io/statsforecast/core.html#statsforecast"><code>StatsForecast</code></a> models for large sets of time series. It operates with pandas DataFrame <code>df</code> that identifies series and datestamps with the <code>unique_id</code> and <code>ds</code> columns. The <code>y</code> column denotes the target time series variable.</p>
+<p>The class has memory-efficient <code>StatsForecast.forecast</code> method that avoids storing partial model outputs. While the <code>StatsForecast.fit</code> and <code>StatsForecast.predict</code> methods with Scikit-learn interface store the fitted models.</p>
+<p><strong>Parameters:</strong><br> <code>df</code>: pandas.DataFrame, with columns [<code>unique_id</code>, <code>ds</code>, <code>y</code>] and exogenous.<br> <code>models</code>: List[typing.Any], list of instantiated objects models.StatsForecast.<br> <code>freq</code>: str, frequency of the data, <a href="https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases">panda’s available frequencies</a>.<br> <code>n_jobs</code>: int, number of jobs used in the parallel processing, use -1 for all cores.<br> <code>sort_df</code>: bool, if True, sort <code>df</code> by [<code>unique_id</code>,<code>ds</code>].<br> <code>fallback_model</code>: Any, Model to be used if a model fails. Only works with the <a href="https://Nixtla.github.io/statsforecast/ets.html#forecast"><code>forecast</code></a> and <a href="https://Nixtla.github.io/statsforecast/distributed.utils.html#cross_validation"><code>cross_validation</code></a> methods.<br> <code>verbose</code>: bool, Prints TQDM progress bar when <code>n_jobs=1</code>.<br> <code>backend</code>: Any, backend used to distributed processing. Only methods <a href="https://Nixtla.github.io/statsforecast/ets.html#forecast"><code>forecast</code></a> add <a href="https://Nixtla.github.io/statsforecast/distributed.utils.html#cross_validation"><code>cross_validation</code></a> are currently supported.<br></p>
+<p><strong>Notes:</strong><br> The <code>core.StatsForecast</code> class offers parallelization utilities with Dask, Spark and Ray back-ends.<br> See distributed computing example <a href="https://github.com/Nixtla/statsforecast/tree/main/experiments/ray">here</a>.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># StatsForecast's class usage example</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#from statsforecast.core import StatsForecast</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.utils <span class="im">import</span> generate_series</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.models <span class="im">import</span> ( </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ADIDA,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    AutoARIMA,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    CrostonClassic,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    CrostonOptimized,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    CrostonSBA,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ETS,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    HistoricAverage,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    IMAPA,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Naive,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    RandomWalkWithDrift,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    SeasonalExponentialSmoothing,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    SeasonalNaive,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    SeasonalWindowAverage,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    SimpleExponentialSmoothing,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    TSB,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    WindowAverage,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate synthetic panel DataFrame for example</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>panel_df <span class="op">=</span> generate_series(n_series<span class="op">=</span><span class="dv">9</span>, equal_ends<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>panel_df.groupby(<span class="st">'unique_id'</span>).tail(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ds</th>
+      <th>y</th>
+    </tr>
+    <tr>
+      <th>unique_id</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2000-08-06</td>
+      <td>1.212726</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>2000-08-07</td>
+      <td>2.442669</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>2000-08-08</td>
+      <td>3.339940</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>2000-08-09</td>
+      <td>4.228065</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2000-04-03</td>
+      <td>0.048275</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2000-04-04</td>
+      <td>1.128070</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2000-04-05</td>
+      <td>2.295968</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2000-04-06</td>
+      <td>3.238239</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2000-06-12</td>
+      <td>6.480128</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2000-06-13</td>
+      <td>0.036217</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2000-06-14</td>
+      <td>1.009650</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2000-06-15</td>
+      <td>2.489787</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2000-08-26</td>
+      <td>3.289840</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2000-08-27</td>
+      <td>4.227949</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2000-08-28</td>
+      <td>5.321176</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2000-08-29</td>
+      <td>6.127013</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2001-01-04</td>
+      <td>5.403709</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2001-01-05</td>
+      <td>6.081779</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2001-01-06</td>
+      <td>0.438420</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2001-01-07</td>
+      <td>1.386855</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2000-10-24</td>
+      <td>5.011166</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2000-10-25</td>
+      <td>6.397153</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2000-10-26</td>
+      <td>0.462146</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2000-10-27</td>
+      <td>1.253125</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2000-08-29</td>
+      <td>5.407805</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2000-08-30</td>
+      <td>6.340789</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2000-08-31</td>
+      <td>0.202894</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2000-09-01</td>
+      <td>1.491204</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2001-02-09</td>
+      <td>1.068102</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2001-02-10</td>
+      <td>2.233974</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2001-02-11</td>
+      <td>3.484143</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2001-02-12</td>
+      <td>4.176505</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2000-02-25</td>
+      <td>4.110373</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2000-02-26</td>
+      <td>5.483879</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2000-02-27</td>
+      <td>6.068916</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2000-02-28</td>
+      <td>0.040499</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Declare list of instantiated StatsForecast estimators to be fitted</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># You can try other estimator's hyperparameters</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># You can try other methods from the `models.StatsForecast` collection</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check them here: https://nixtla.github.io/statsforecast/models.html</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>models<span class="op">=</span>[AutoARIMA(), Naive(), ETS()] </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate StatsForecast class</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(df<span class="op">=</span>panel_df,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                     models<span class="op">=</span>models,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                     freq<span class="op">=</span><span class="st">'D'</span>, </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                     n_jobs<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                     verbose<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Efficiently predict</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>fcsts_df <span class="op">=</span> fcst.forecast(h<span class="op">=</span><span class="dv">4</span>, fitted<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>fcsts_df.groupby(<span class="st">'unique_id'</span>).tail(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L520" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="statsforecast.fit" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast.fit">StatsForecast.fit</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast.fit (df:Optional[pandas.core.frame.DataFrame]=None,
+                    sort_df:bool=True)</code></pre>
+</blockquote>
+<p>Fit the core.StatsForecast.</p>
+<p>Fit <code>models</code> to a large set of time series from DataFrame <code>df</code>. and store fitted models for later inspection.</p>
+<p><strong>Parameters:</strong><br> <code>df</code>: pandas.DataFrame, with columns [<code>unique_id</code>, <code>ds</code>, <code>y</code>] and exogenous.<br> <code>sort_df</code>: bool, if True, sort <code>df</code> by [<code>unique_id</code>,<code>ds</code>].<br></p>
+<p><strong>Returns:</strong><br> <code>self</code>: Returns with stored <a href="https://Nixtla.github.io/statsforecast/core.html#statsforecast"><code>StatsForecast</code></a> fitted <code>models</code>.</p>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L571" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="satstforecast.predict" class="level2">
+<h2 class="anchored" data-anchor-id="satstforecast.predict">SatstForecast.predict</h2>
+<blockquote class="blockquote">
+<pre><code> SatstForecast.predict (h:int,
+                        X_df:Optional[pandas.core.frame.DataFrame]=None,
+                        level:Optional[List[int]]=None)</code></pre>
+</blockquote>
+<p>Predict with core.StatsForecast.</p>
+<p>Use stored fitted <code>models</code> to predict large set of time series from DataFrame <code>df</code>.</p>
+<p><strong>Parameters:</strong><br> <code>h</code>: int, forecast horizon.<br> <code>X_df</code>: pandas.DataFrame, with [<code>unique_id</code>, <code>ds</code>] columns and <code>df</code>’s future exogenous.<br> <code>level</code>: float list 0-100, confidence levels for prediction intervals.<br></p>
+<p><strong>Returns:</strong><br> <code>fcsts_df</code>: pandas.DataFrame, with <code>models</code> columns for point predictions and probabilistic predictions for all fitted <code>models</code>.<br></p>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L599" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="statsforecast.fit_predict" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast.fit_predict">StatsForecast.fit_predict</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast.fit_predict (h:int,
+                            df:Optional[pandas.core.frame.DataFrame]=None,
+                            X_df:Optional[pandas.core.frame.DataFrame]=Non
+                            e, level:Optional[List[int]]=None,
+                            sort_df:bool=True)</code></pre>
+</blockquote>
+<p>Fit and Predict with core.StatsForecast.</p>
+<p>This method avoids memory burden due from object storage. It is analogous to Scikit-Learn <code>fit_predict</code> without storing information. It requires the forecast horizon <code>h</code> in advance.</p>
+<p>In contrast to <code>StatsForecast.forecast</code> this method stores partial models outputs.</p>
+<p><strong>Parameters:</strong><br> <code>h</code>: int, forecast horizon.<br> <code>df</code>: pandas.DataFrame, with columns [<code>unique_id</code>, <code>ds</code>, <code>y</code>] and exogenous. <code>X_df</code>: pandas.DataFrame, with [<code>unique_id</code>, <code>ds</code>] columns and <code>df</code>’s future exogenous.<br> <code>level</code>: float list 0-100, confidence levels for prediction intervals.<br> <code>sort_df</code>: bool, if True, sort <code>df</code> by [<code>unique_id</code>,<code>ds</code>].</p>
+<p><strong>Returns:</strong><br> <code>fcsts_df</code>: pandas.DataFrame, with <code>models</code> columns for point predictions and probabilistic predictions for all fitted <code>models</code>.<br></p>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L640" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="statsforecast.forecast" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast.forecast">StatsForecast.forecast</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast.forecast (h:int,
+                         df:Optional[pandas.core.frame.DataFrame]=None,
+                         X_df:Optional[pandas.core.frame.DataFrame]=None,
+                         level:Optional[List[int]]=None,
+                         fitted:bool=False, sort_df:bool=True)</code></pre>
+</blockquote>
+<p>Memory Efficient core.StatsForecast predictions.</p>
+<p>This method avoids memory burden due from object storage. It is analogous to Scikit-Learn <code>fit_predict</code> without storing information. It requires the forecast horizon <code>h</code> in advance.</p>
+<p><strong>Parameters:</strong><br> <code>h</code>: int, forecast horizon.<br> <code>df</code>: pandas.DataFrame, with columns [<code>unique_id</code>, <code>ds</code>, <code>y</code>] and exogenous.<br> <code>X_df</code>: pandas.DataFrame, with [<code>unique_id</code>, <code>ds</code>] columns and <code>df</code>’s future exogenous.<br> <code>level</code>: float list 0-100, confidence levels for prediction intervals.<br> <code>fitted</code>: bool, wether or not returns insample predictions.<br> <code>sort_df</code>: bool, if True, sort <code>df</code> by [<code>unique_id</code>,<code>ds</code>].<br></p>
+<p><strong>Returns:</strong><br> <code>fcsts_df</code>: pandas.DataFrame, with <code>models</code> columns for point predictions and probabilistic predictions for all fitted <code>models</code>.<br></p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># StatsForecast.forecast method usage example</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#from statsforecast.core import StatsForecast</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.utils <span class="im">import</span> AirPassengersDF <span class="im">as</span> panel_df</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.models <span class="im">import</span> AutoARIMA, Naive</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate StatsForecast class</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(df<span class="op">=</span>panel_df,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                     models<span class="op">=</span>[AutoARIMA(), Naive()],</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                     freq<span class="op">=</span><span class="st">'D'</span>, n_jobs<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Efficiently predict without storing memory</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>fcsts_df <span class="op">=</span> fcst.forecast(h<span class="op">=</span><span class="dv">4</span>, fitted<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>fcsts_df.groupby(<span class="st">'unique_id'</span>).tail(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ds</th>
+      <th>AutoARIMA</th>
+      <th>Naive</th>
+    </tr>
+    <tr>
+      <th>unique_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1.0</th>
+      <td>1961-01-01</td>
+      <td>476.006500</td>
+      <td>432.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1961-01-02</td>
+      <td>482.846222</td>
+      <td>432.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1961-01-03</td>
+      <td>512.423523</td>
+      <td>432.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1961-01-04</td>
+      <td>502.038269</td>
+      <td>432.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L689" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="statsforecast.forecast_fitted_values" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast.forecast_fitted_values">StatsForecast.forecast_fitted_values</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast.forecast_fitted_values ()</code></pre>
+</blockquote>
+<p>Access core.StatsForecast insample predictions.</p>
+<p>After executing <code>StatsForecast.forecast</code>, you can access the insample prediction values for each model. To get them, you need to pass <code>fitted=True</code> to the <code>StatsForecast.forecast</code> method and then use the <code>StatsForecast.forecast_fitted_values</code> method.</p>
+<p><strong>Parameters:</strong><br> Check <code>StatsForecast.forecast</code> parameters, use <code>fitted=True</code>.<br></p>
+<p><strong>Returns:</strong><br> <code>fcsts_df</code>: pandas.DataFrame, with insample <code>models</code> columns for point predictions and probabilistic predictions for all fitted <code>models</code>.<br></p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># StatsForecast.forecast_fitted_values method usage example</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#from statsforecast.core import StatsForecast</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.utils <span class="im">import</span> AirPassengersDF <span class="im">as</span> panel_df</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.models <span class="im">import</span> Naive</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate StatsForecast class</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(df<span class="op">=</span>panel_df,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                     models<span class="op">=</span>[AutoARIMA()],</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>                     freq<span class="op">=</span><span class="st">'D'</span>, n_jobs<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Access insample predictions</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>fcsts_df <span class="op">=</span> fcst.forecast(h<span class="op">=</span><span class="dv">12</span>, fitted<span class="op">=</span><span class="va">True</span>, level<span class="op">=</span>(<span class="dv">90</span>, <span class="dv">10</span>))</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>insample_fcsts_df <span class="op">=</span> fcst.forecast_fitted_values()</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>insample_fcsts_df.tail(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ds</th>
+      <th>y</th>
+      <th>AutoARIMA</th>
+      <th>AutoARIMA-lo-90</th>
+      <th>AutoARIMA-lo-10</th>
+      <th>AutoARIMA-hi-10</th>
+      <th>AutoARIMA-hi-90</th>
+    </tr>
+    <tr>
+      <th>unique_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1.0</th>
+      <td>1960-09-30</td>
+      <td>508.0</td>
+      <td>572.654175</td>
+      <td>525.092163</td>
+      <td>569.020630</td>
+      <td>576.287781</td>
+      <td>620.216187</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1960-10-31</td>
+      <td>461.0</td>
+      <td>451.528259</td>
+      <td>403.966248</td>
+      <td>447.894684</td>
+      <td>455.161835</td>
+      <td>499.090271</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1960-11-30</td>
+      <td>390.0</td>
+      <td>437.915375</td>
+      <td>390.353394</td>
+      <td>434.281799</td>
+      <td>441.548981</td>
+      <td>485.477386</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1960-12-31</td>
+      <td>432.0</td>
+      <td>369.718781</td>
+      <td>322.156769</td>
+      <td>366.085205</td>
+      <td>373.352356</td>
+      <td>417.280792</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L712" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="statsforecast.cross_validation" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast.cross_validation">StatsForecast.cross_validation</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast.cross_validation (h:int,
+                                 df:Optional[pandas.core.frame.DataFrame]=
+                                 None, n_windows:int=1, step_size:int=1,
+                                 test_size:Optional[int]=None,
+                                 input_size:Optional[int]=None,
+                                 level:Optional[List[int]]=None,
+                                 fitted:bool=False, sort_df:bool=True)</code></pre>
+</blockquote>
+<p>Temporal Cross-Validation with core.StatsForecast.</p>
+<p><code>core.StatsForecast</code>’s cross-validation efficiently fits a list of StatsForecast models through multiple training windows, in either chained or rolled manner.</p>
+<p><code>StatsForecast.models</code>’ speed allows to overcome this evaluation technique high computational costs. Temporal cross-validation provides better model’s generalization measurements by increasing the test’s length and diversity.</p>
+<p><strong>Parameters:</strong><br> <code>h</code>: int, forecast horizon.<br> <code>df</code>: pandas.DataFrame, with columns [<code>unique_id</code>, <code>ds</code>, <code>y</code>] and exogenous.<br> <code>n_windows</code>: int, number of windows used for cross validation.<br> <code>step_size</code>: int = 1, step size between each window.<br> <code>test_size</code>: Optional[int] = None, length of test size. If passed, set <code>n_windows=None</code>.<br> <code>input_size</code>: Optional[int] = None, input size for each window, if not none rolled windows.<br> <code>level</code>: float list 0-100, confidence levels for prediction intervals.<br> <code>fitted</code>: bool, wether or not returns insample predictions.<br> <code>sort_df</code>: bool, if True, sort <code>df</code> by <code>unique_id</code> and <code>ds</code>.</p>
+<p><strong>Returns:</strong><br> <code>fcsts_df</code>: pandas.DataFrame, with insample <code>models</code> columns for point predictions and probabilistic predictions for all fitted <code>models</code>.<br></p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># StatsForecast.crossvalidation method usage example</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#from statsforecast.core import StatsForecast</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.utils <span class="im">import</span> AirPassengersDF <span class="im">as</span> panel_df</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.models <span class="im">import</span> Naive</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate StatsForecast class</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(df<span class="op">=</span>panel_df,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                     models<span class="op">=</span>[Naive()],</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                     freq<span class="op">=</span><span class="st">'D'</span>, n_jobs<span class="op">=</span><span class="dv">1</span>, verbose<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Access insample predictions</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>rolled_fcsts_df <span class="op">=</span> fcst.cross_validation(<span class="dv">14</span>, n_windows<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>rolled_fcsts_df.head(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Cross Validation Time Series 1:   0%|          | 0/2 [00:00&lt;?, ?it/s]Cross Validation Time Series 1: 100%|##########| 2/2 [00:00&lt;00:00, 10010.27it/s]</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ds</th>
+      <th>cutoff</th>
+      <th>y</th>
+      <th>Naive</th>
+    </tr>
+    <tr>
+      <th>unique_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1.0</th>
+      <td>1960-12-17</td>
+      <td>1960-12-16</td>
+      <td>407.0</td>
+      <td>463.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1960-12-18</td>
+      <td>1960-12-16</td>
+      <td>362.0</td>
+      <td>463.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1960-12-19</td>
+      <td>1960-12-16</td>
+      <td>405.0</td>
+      <td>463.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1960-12-20</td>
+      <td>1960-12-16</td>
+      <td>417.0</td>
+      <td>463.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L800" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="statsforecast.cross_validation_fitted_values" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast.cross_validation_fitted_values">StatsForecast.cross_validation_fitted_values</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast.cross_validation_fitted_values ()</code></pre>
+</blockquote>
+<p>Access core.StatsForecast insample cross validated predictions.</p>
+<p>After executing <code>StatsForecast.cross_validation</code>, you can access the insample prediction values for each model and window. To get them, you need to pass <code>fitted=True</code> to the <code>StatsForecast.cross_validation</code> method and then use the <code>StatsForecast.cross_validation_fitted_values</code> method.</p>
+<p><strong>Parameters:</strong><br> Check <code>StatsForecast.cross_validation</code> parameters, use <code>fitted=True</code>.<br></p>
+<p><strong>Returns:</strong><br> <code>fcsts_df</code>: pandas.DataFrame, with insample <code>models</code> columns for point predictions and probabilistic predictions for all fitted <code>models</code>.<br></p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># StatsForecast.cross_validation_fitted_values method usage example</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#from statsforecast.core import StatsForecast</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.utils <span class="im">import</span> AirPassengersDF <span class="im">as</span> panel_df</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.models <span class="im">import</span> Naive</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate StatsForecast class</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(df<span class="op">=</span>panel_df,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                     models<span class="op">=</span>[Naive()],</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                     freq<span class="op">=</span><span class="st">'D'</span>, n_jobs<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Access insample predictions</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>rolled_fcsts_df <span class="op">=</span> fcst.cross_validation(h<span class="op">=</span><span class="dv">12</span>, n_windows<span class="op">=</span><span class="dv">2</span>, fitted<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>insample_rolled_fcsts_df <span class="op">=</span> fcst.cross_validation_fitted_values()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>insample_rolled_fcsts_df.tail(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ds</th>
+      <th>cutoff</th>
+      <th>y</th>
+      <th>Naive</th>
+    </tr>
+    <tr>
+      <th>unique_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1.0</th>
+      <td>1959-09-30</td>
+      <td>1959-12-31</td>
+      <td>463.0</td>
+      <td>559.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1959-10-31</td>
+      <td>1959-12-31</td>
+      <td>407.0</td>
+      <td>463.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1959-11-30</td>
+      <td>1959-12-31</td>
+      <td>362.0</td>
+      <td>407.0</td>
+    </tr>
+    <tr>
+      <th>1.0</th>
+      <td>1959-12-31</td>
+      <td>1959-12-31</td>
+      <td>405.0</td>
+      <td>362.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Nixtla/statsforecast/blob/main/statsforecast/core.py#L996" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="statsforecast.plot" class="level2">
+<h2 class="anchored" data-anchor-id="statsforecast.plot">StatsForecast.plot</h2>
+<blockquote class="blockquote">
+<pre><code> StatsForecast.plot (df:pandas.core.frame.DataFrame,
+                     forecasts_df:Optional[pandas.core.frame.DataFrame]=No
+                     ne, unique_ids:Union[List[str],NoneType,numpy.ndarray
+                     ]=None, plot_random:bool=True,
+                     models:Optional[List[str]]=None,
+                     level:Optional[List[float]]=None,
+                     max_insample_length:Optional[int]=None,
+                     plot_anomalies:Optional[bool]=False,
+                     engine:str='plotly')</code></pre>
+</blockquote>
+<p>Plot forecasts and insample values.</p>
+<p><strong>Parameters:</strong><br> <code>df</code>: pandas.DataFrame, with columns [<code>unique_id</code>, <code>ds</code>, <code>y</code>].<br> <code>forecasts_df</code>: pandas.DataFrame, with columns [<code>unique_id</code>, <code>ds</code>] and models.<br> <code>unique_ids</code>: List[str], Time Series to plot.<br> <code>plot_random</code>: bool, Select time series to plot randomly.<br> <code>models</code>: List[str], List of models to plot.<br> <code>level</code>: List[float], List of prediction intervals to plot if paseed.<br> <code>max_insample_length</code>: int, max number of train/insample observations to be plotted.<br> <code>plot_anomalies</code>: bool, Plot anomalies for each prediction interval.<br> <code>engine</code>: str, library used to plot. ‘plotly’ or ‘matplotlib’.<br></p>
+</section>
+<section id="misc" class="level1">
+<h1>Misc</h1>
+<section id="integer-datestamp" class="level2">
+<h2 class="anchored" data-anchor-id="integer-datestamp">Integer datestamp</h2>
+<p>The <a href="https://Nixtla.github.io/statsforecast/core.html#statsforecast"><code>StatsForecast</code></a> class can also receive integers as datestamp, the following example shows how to do it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.core <span class="im">import</span> StatsForecast</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.utils <span class="im">import</span> AirPassengers <span class="im">as</span> ap</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsforecast.models <span class="im">import</span> HistoricAverage</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>int_ds_df <span class="op">=</span> pd.DataFrame({<span class="st">'ds'</span>: np.arange(<span class="dv">1</span>, <span class="bu">len</span>(ap) <span class="op">+</span> <span class="dv">1</span>), <span class="st">'y'</span>: ap})</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>int_ds_df.insert(<span class="dv">0</span>, <span class="st">'unique_id'</span>, <span class="st">'AirPassengers'</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>int_ds_df.set_index(<span class="st">'unique_id'</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>int_ds_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>int_ds_df.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(df<span class="op">=</span>int_ds_df, models<span class="op">=</span>[HistoricAverage()], freq<span class="op">=</span><span class="st">'D'</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>horizon <span class="op">=</span> <span class="dv">7</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>forecast <span class="op">=</span> fcst.forecast(horizon)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>forecast.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>last_date <span class="op">=</span> int_ds_df[<span class="st">'ds'</span>].<span class="bu">max</span>()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>test_eq(forecast[<span class="st">'ds'</span>].values, np.arange(last_date <span class="op">+</span> <span class="dv">1</span>, last_date <span class="op">+</span> <span class="dv">1</span> <span class="op">+</span> horizon))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>int_ds_cv <span class="op">=</span> fcst.cross_validation(h<span class="op">=</span><span class="dv">7</span>, test_size<span class="op">=</span><span class="dv">8</span>, n_windows<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>int_ds_cv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="external-regressors" class="level2">
+<h2 class="anchored" data-anchor-id="external-regressors">External regressors</h2>
+<p>Every column after <strong>y</strong> is considered an external regressor and will be passed to the models that allow them. If you use them you must supply the future values to the <code>StatsForecast.forecast</code> method.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinearRegression:</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> fit(<span class="va">self</span>, y, X):</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.coefs_, <span class="op">*</span>_ <span class="op">=</span> np.linalg.lstsq(X, y, rcond<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> predict(<span class="va">self</span>, h, X):</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>        mean <span class="op">=</span> X <span class="op">@</span> coefs</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> mean</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__repr__</span>(<span class="va">self</span>):</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">'LinearRegression()'</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forecast(<span class="va">self</span>, y, h, X<span class="op">=</span><span class="va">None</span>, X_future<span class="op">=</span><span class="va">None</span>, fitted<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>        coefs, <span class="op">*</span>_ <span class="op">=</span> np.linalg.lstsq(X, y, rcond<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">'mean'</span>: X_future <span class="op">@</span> coefs}</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> new(<span class="va">self</span>):</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>        b <span class="op">=</span> <span class="bu">type</span>(<span class="va">self</span>).<span class="fu">__new__</span>(<span class="bu">type</span>(<span class="va">self</span>))</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>        b.__dict__.update(<span class="va">self</span>.__dict__)</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>series_xreg <span class="op">=</span> series <span class="op">=</span> generate_series(<span class="dv">10_000</span>, equal_ends<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>series_xreg[<span class="st">'intercept'</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>series_xreg[<span class="st">'dayofweek'</span>] <span class="op">=</span> series_xreg[<span class="st">'ds'</span>].dt.dayofweek</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>series_xreg <span class="op">=</span> pd.get_dummies(series_xreg, columns<span class="op">=</span>[<span class="st">'dayofweek'</span>], drop_first<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>series_xreg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dates <span class="op">=</span> <span class="bu">sorted</span>(series_xreg[<span class="st">'ds'</span>].unique())</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>valid_start <span class="op">=</span> dates[<span class="op">-</span><span class="dv">14</span>]</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>train_mask <span class="op">=</span> series_xreg[<span class="st">'ds'</span>] <span class="op">&lt;</span> valid_start</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>series_train <span class="op">=</span> series_xreg[train_mask]</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>series_valid <span class="op">=</span> series_xreg[<span class="op">~</span>train_mask]</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>X_valid <span class="op">=</span> series_valid.drop(columns<span class="op">=</span>[<span class="st">'y'</span>])</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>series_train,</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    models<span class="op">=</span>[LinearRegression()],</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    freq<span class="op">=</span><span class="st">'D'</span>,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>xreg_res <span class="op">=</span> fcst.forecast(<span class="dv">14</span>, X_df<span class="op">=</span>X_valid)</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>xreg_res[<span class="st">'y'</span>] <span class="op">=</span> series_valid[<span class="st">'y'</span>].values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>xreg_res.groupby(<span class="st">'ds'</span>).mean().plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>xreg_res_cv <span class="op">=</span> fcst.cross_validation(h<span class="op">=</span><span class="dv">3</span>, test_size<span class="op">=</span><span class="dv">5</span>, n_windows<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="confidence-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="confidence-intervals">Confidence intervals</h2>
+<p>You can pass the argument <code>level</code> to the <code>StatsForecast.forecast</code> method to calculate confidence intervals. Not all models can calculate them at the moment, so we will only obtain the intervals of those models that have it implemented.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ap_df <span class="op">=</span> pd.DataFrame({<span class="st">'ds'</span>: np.arange(ap.size), <span class="st">'y'</span>: ap}, index<span class="op">=</span>pd.Index([<span class="dv">0</span>] <span class="op">*</span> ap.size, name<span class="op">=</span><span class="st">'unique_id'</span>))</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>fcst <span class="op">=</span> StatsForecast(</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>ap_df,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    models<span class="op">=</span>[</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        SeasonalNaive(season_length<span class="op">=</span><span class="dv">12</span>), </span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        AutoARIMA(season_length<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    freq<span class="op">=</span><span class="st">'M'</span>,</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    n_jobs<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>ap_ci <span class="op">=</span> fcst.forecast(<span class="dv">12</span>, level<span class="op">=</span>(<span class="dv">80</span>, <span class="dv">95</span>))</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>ap_ci.set_index(<span class="st">'ds'</span>).plot(marker<span class="op">=</span><span class="st">'.'</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">#hide</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> test_conf_intervals(n_jobs<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    ap_df <span class="op">=</span> pd.DataFrame({<span class="st">'ds'</span>: np.arange(ap.size), <span class="st">'y'</span>: ap}, index<span class="op">=</span>pd.Index([<span class="dv">0</span>] <span class="op">*</span> ap.size, name<span class="op">=</span><span class="st">'unique_id'</span>))</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    fcst <span class="op">=</span> StatsForecast(</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        df<span class="op">=</span>ap_df,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>        models<span class="op">=</span>[</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>            SeasonalNaive(season_length<span class="op">=</span><span class="dv">12</span>), </span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>            AutoARIMA(season_length<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>        freq<span class="op">=</span><span class="st">'M'</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>        n_jobs<span class="op">=</span>n_jobs</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    ap_ci <span class="op">=</span> fcst.forecast(<span class="dv">12</span>, level<span class="op">=</span>(<span class="dv">80</span>, <span class="dv">95</span>))</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    ap_ci.set_index(<span class="st">'ds'</span>).plot(marker<span class="op">=</span><span class="st">'.'</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>test_conf_intervals(n_jobs<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+</section>
+
+<p>Give us a ⭐&nbsp;on <a href="https://github.com/nixtla/statsforecast">Github</a></p></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
